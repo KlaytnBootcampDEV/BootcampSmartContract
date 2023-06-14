@@ -95,4 +95,16 @@ describe("Voting Contract", function () {
     const proposalInfo = await votingContract.resultProposal(0);
     expect(proposalInfo).to.equal(1);
   });
+
+  it("should fail if finalize the proposal before deadline", async function () {
+    await votingToken.approve(votingContract.address, parseEther("20"));
+    await votingContract.createProposal("Test Proposal");
+
+    await votingToken.connect(addr1).deposit({ value: parseEther("1") });
+    await votingContract.connect(addr1).castVote(0, true);
+
+    await expect(votingContract.finalizeProposal(0)).to.revertedWith(
+      "Not ended"
+    );
+  });
 });
